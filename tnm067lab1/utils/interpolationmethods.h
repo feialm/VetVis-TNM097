@@ -34,10 +34,14 @@ namespace Interpolation {
 #define ENABLE_LINEAR_UNITTEST 0
 template <typename T, typename F = double>
 T linear(const T& a, const T& b, F x) {
-    if (x <= 0) return a;
-    if (x >= 1) return b;
 
-    return  a;
+    // linjär här men skriv bilinjär i cpp filen
+    T& XX = a * (1 - x) + b * x;
+
+   if (x <= 0) return a; // x1, x2
+   if (x >= 1) return b; // f1, f2
+
+    return XX;
 }
 
 // clang-format off
@@ -50,9 +54,11 @@ T linear(const T& a, const T& b, F x) {
         x
     */
     // clang format on
-#define ENABLE_BILINEAR_UNITTEST 0
+#define ENABLE_BILINEAR_UNITTEST 1
+//change from 0 to 1 -> enables the unittest, man ska få pass --> implementerat bilinear korrekt
 template<typename T, typename F = double> 
 T bilinear(const std::array<T, 4> &v, F x, F y) {
+
     return v[0];
 }
 
