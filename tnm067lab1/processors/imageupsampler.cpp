@@ -47,10 +47,15 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
             case ImageUpsampler::IntepolationMethod::PiecewiseConstant: {
                 // Task 6
                 // Update finalColor
+
+                // inPixels = färgen för punkten inIndex, inIndex = pixeln i mitten, inImageCord är koordinaterna närmast (granne grejset)
+                finalColor = inPixels[inIndex(floor(inImageCoords))];
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Bilinear: {
                 // Update finalColor
+
+
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Biquadratic: {
@@ -120,9 +125,14 @@ void ImageUpsampler::process() {
 
 dvec2 ImageUpsampler::convertCoordinate(ivec2 outImageCoords, size2_t inputSize, size2_t outputSize) {
     // TODO implement
-    dvec2 c(outImageCoords);
+
+    dvec2 c(outImageCoords); // x och y, vec2 gör till vektor av doubles, dom här coordinaterna vi vill scala om
 
     // TASK 5: Convert the outImageCoords to its coordinates in the input image
+
+    dvec2 factor = dvec2(inputSize) / dvec2(outputSize); // factor behöver definieras innan
+
+    c = c * factor;
 
     return c;
 }
