@@ -48,18 +48,72 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
                 // Task 6
                 // Update finalColor
 
+
                 // inPixels = färgen för punkten inIndex, inIndex = pixeln i mitten, inImageCord är koordinaterna närmast (granne grejset)
+                // inIndex = calculate pixel index from image coordinates
+                // inPixels = get pixel by index
+
                 finalColor = inPixels[inIndex(floor(inImageCoords))];
+
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Bilinear: {
                 // Update finalColor
 
+                ivec2 position0{ floor(inImageCoords.x),floor(inImageCoords.y) }; // ivec2 = 2 dimensional integer vector, storar x och y koordinaterna
+                ivec2 position1{ ceil(inImageCoords.x),floor(inImageCoords.y) };
+                ivec2 position2{ floor(inImageCoords.x),ceil(inImageCoords.y) };
+                ivec2 position3{ ceil(inImageCoords.x),ceil(inImageCoords.y) };
+                   
+                std::array<T, 4> v{
+                    inPixels[inIndex(position0)],
+                    inPixels[inIndex(position1)],
+                    inPixels[inIndex(position2)],
+                    inPixels[inIndex(position3)]
+                };
 
+                double x = inImageCoords.x - position0.x; // Get domain value in x direction
+                double y = inImageCoords.y - position0.y; // Get domain value in y direction
+
+                finalColor = TNM067::Interpolation::bilinear(v, x, y);
+                
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Biquadratic: {
                 // Update finalColor
+
+                ivec2 position0{ floor(inImageCoords.x),floor(inImageCoords.y) }; // ivec2 = 2 dimensional integer vector, storar x och y koordinaterna
+                ivec2 position1{ ceil(inImageCoords.x),floor(inImageCoords.y) };
+                ivec2 position2{ ceil(inImageCoords.x)+1,floor(inImageCoords.y) };
+
+
+                ivec2 position3{ floor(inImageCoords.x),ceil(inImageCoords.y) };
+                ivec2 position4{ ceil(inImageCoords.x),ceil(inImageCoords.y) }; // ivec2 = 2 dimensional integer vector, storar x och y koordinaterna
+                ivec2 position5{ ceil(inImageCoords.x)+1,ceil(inImageCoords.y) };
+
+                ivec2 position6{ floor(inImageCoords.x),ceil(inImageCoords.y)+1 };
+                ivec2 position7{ ceil(inImageCoords.x),ceil(inImageCoords.y)+1 };
+                ivec2 position8{ ceil(inImageCoords.x)+1,ceil(inImageCoords.y) +1};
+
+                std::array<T, 9> v{
+                    inPixels[inIndex(position0)],
+                    inPixels[inIndex(position1)],
+                    inPixels[inIndex(position2)],
+                    inPixels[inIndex(position3)],
+                    inPixels[inIndex(position4)],
+                    inPixels[inIndex(position5)],
+                    inPixels[inIndex(position6)],
+                    inPixels[inIndex(position7)],
+                    inPixels[inIndex(position8)]
+                };
+
+                double x = inImageCoords.x - position0.x; // Get parametrization in x direction
+                double y = inImageCoords.y - position0.y; // Get parametrization in y direction
+
+
+                finalColor = TNM067::Interpolation::biQuadratic(v, x/2.0, y/2.0); // Divide with 2 as we have quadratic interpolation, 
+                //pixels found are double the actual length and need to half the parametrization (quadratic fit)
+
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Barycentric: {
@@ -125,8 +179,7 @@ void ImageUpsampler::process() {
 
 dvec2 ImageUpsampler::convertCoordinate(ivec2 outImageCoords, size2_t inputSize, size2_t outputSize) {
     // TODO implement
-
-    dvec2 c(outImageCoords); // x och y, vec2 gör till vektor av doubles, dom här coordinaterna vi vill scala om
+    dvec2 c(outImageCoords);
 
     // TASK 5: Convert the outImageCoords to its coordinates in the input image
 
