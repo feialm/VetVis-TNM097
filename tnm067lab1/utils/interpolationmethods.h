@@ -31,17 +31,17 @@ struct float_type<vec4> {
 namespace TNM067 {
 namespace Interpolation {
 
-#define ENABLE_LINEAR_UNITTEST 0
+#define ENABLE_LINEAR_UNITTEST 1
 template <typename T, typename F = double>
 T linear(const T& a, const T& b, F x) {
+    if (x <= 0) return a;
+    if (x >= 1) return b;
 
     // linjär här men skriv bilinjär i cpp filen
-    T& XX = a * (1 - x) + b * x;
+    T XX = a * (1 - x) + b * x;
+    //a,b - koefficienter
 
-   if (x <= 0) return a; // x1, x2
-   if (x >= 1) return b; // f1, f2
-
-    return XX;
+    return  XX;
 }
 
 // clang-format off
@@ -55,11 +55,14 @@ T linear(const T& a, const T& b, F x) {
     */
     // clang format on
 #define ENABLE_BILINEAR_UNITTEST 1
-//change from 0 to 1 -> enables the unittest, man ska få pass --> implementerat bilinear korrekt
 template<typename T, typename F = double> 
 T bilinear(const std::array<T, 4> &v, F x, F y) {
 
-    return v[0];
+    T l1 = linear(v[0], v[1], x);
+    T l2 = linear(v[2], v[3], x);
+    T l3 = linear(l1, l2, y);
+
+    return l3;
 }
 
 
@@ -69,10 +72,18 @@ T bilinear(const std::array<T, 4> &v, F x, F y) {
     0  x    1      2
     */
 // clang-format on
-#define ENABLE_QUADRATIC_UNITTEST 0
+#define ENABLE_QUADRATIC_UNITTEST 1
 template <typename T, typename F = double>
 T quadratic(const T& a, const T& b, const T& c, F x) {
-    return a;
+
+    //le.2 slide 45
+    // x = t
+    // a = f1
+    // b = f2
+    // c = f3
+
+    T f = (1-x) * (1-2*x) * a + 4 * x * (1-x) * b + x * (2*x-1) * c;
+    return f;
 }
 
 // clang-format off
@@ -89,10 +100,17 @@ T quadratic(const T& a, const T& b, const T& c, F x) {
     0  x    1       2
     */
 // clang-format on
-#define ENABLE_BIQUADRATIC_UNITTEST 0
+#define ENABLE_BIQUADRATIC_UNITTEST 1
 template <typename T, typename F = double>
 T biQuadratic(const std::array<T, 9>& v, F x, F y) {
-    return v[0];
+    
+    T q1 = quadratic(v[0], v[1], v[2], x);
+    T q2 = quadratic(v[3], v[4], v[5], x);
+    T q3 = quadratic(v[6], v[7], v[8], x);
+
+    T q4 = quadratic(q1, q2, q3, y);
+
+    return q4;
 }
 
 // clang-format off
@@ -109,6 +127,16 @@ T biQuadratic(const std::array<T, 9>& v, F x, F y) {
 #define ENABLE_BARYCENTRIC_UNITTEST 0
 template <typename T, typename F = double>
 T barycentric(const std::array<T, 4>& v, F x, F y) {
+
+    // We want to find alpha,beta,gamma coordinates and A,B,C vertices
+    // Lec.2, slide 50: P(alpha,beta,gamma) = alpha * A + beta * B + gamma * C
+    // We know: alpha + beta + gamma = 1
+
+    F alpha, beta, gamma;
+    T P;
+
+
+
     return v[0];
 }
 
