@@ -133,11 +133,37 @@ T barycentric(const std::array<T, 4>& v, F x, F y) {
     // We know: alpha + beta + gamma = 1
 
     F alpha, beta, gamma;
-    T P;
+    T p_Alpha, p_Beta, p_Gamma;
+
+    p_Beta = v[1];
+    p_Gamma = v[2];
+
+    // We know: alpha + beta + gamma = 1
+    // determinate alpha, beta and gamma
+    // x and y is (x,y) coordinates for point P in triangle, with that we can figure out the variables
+    if (x + y < 1.0f) {
+        alpha = 1.0 - y - x;
+        beta = y;
+        gamma = x;
+
+        p_Alpha = v[0];
+    }
+    else {
+        //alpha + beta + gamma > 1
+        alpha = y + x - 1.0;
+        beta = 1.0 - x;
+        gamma = 1.0 - y;
+
+        p_Alpha = v[3];
+
+    }
+
+    //P(alpha, beta, gamma) = alpha * A + beta * B + gamma * C
+    T p_abg = alpha * p_Alpha + beta * p_Beta + gamma * p_Gamma;
 
 
 
-    return v[0];
+    return p_abg;
 }
 
 }  // namespace Interpolation
