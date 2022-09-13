@@ -12,8 +12,6 @@ vec4 ScalarToColorMapping::sample(float t) const {
     if (t >= 1) return vec4(baseColors_.back());
 
     // TODO: use t to select which two base colors to interpolate in-between
-
-    
     // plocka ut två färger från basecolors, med t
     // få hela storleken av baseColors_
     // t som index
@@ -21,22 +19,24 @@ vec4 ScalarToColorMapping::sample(float t) const {
     // RGB
     // 5 färger men size är 4
 
-    float new_t = t * (baseColors_.size() - 1);
+    float new_t = t * (baseColors_.size() - 1.f); // 0.4 * ( 5 - 1) = 1.6
+    int index = new_t; // 1, avrundar neråt
 
-    // interpolate those two values
-    int rightIndex = ceil(new_t);
-    int leftIndex = floor(new_t);
     
-    vec4 col_R = baseColors_[rightIndex];
-    vec4 col_L = baseColors_[leftIndex];
+    // interpolate those two values
+   // int rightIndex = ceil(dummy);
+   // int leftIndex = floor(dummy);
+
+    vec4 col_L = baseColors_[index];
+    vec4 col_R = baseColors_[index + 1];
 
     // linear interpolate
     // 1 - något
-    
+
     // TODO: Interpolate colors in baseColors_ and set dummy color to result
 
     //vec4 finalColor(t, t, t, 1);  // dummy color
-    vec4 finalColor = (col_R - col_L) * (new_t-col_L)+col_L;
+    vec4 finalColor = (col_R - col_L) * (new_t - index) + col_L;
        
     return finalColor;
 }
