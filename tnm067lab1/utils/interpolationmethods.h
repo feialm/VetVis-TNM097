@@ -124,7 +124,7 @@ T biQuadratic(const std::array<T, 9>& v, F x, F y) {
         x
     */
 // clang-format on
-#define ENABLE_BARYCENTRIC_UNITTEST 0
+#define ENABLE_BARYCENTRIC_UNITTEST 1
 template <typename T, typename F = double>
 T barycentric(const std::array<T, 4>& v, F x, F y) {
 
@@ -133,7 +133,7 @@ T barycentric(const std::array<T, 4>& v, F x, F y) {
     // We know: alpha + beta + gamma = 1
 
     F alpha, beta, gamma;
-    T p_Alpha, p_Beta, p_Gamma; //A,B,C
+    T p_Alpha, p_Beta, p_Gamma;
 
     p_Beta = v[1]; // B
     p_Gamma = v[2]; // C
@@ -142,18 +142,18 @@ T barycentric(const std::array<T, 4>& v, F x, F y) {
     // determinate alpha, beta and gamma
     // x and y is (x,y) coordinates for point P in triangle, with that we can figure out the variables
     // overall: there are ratios to consider!
-    if (x + y < 1.0f) { // point P is situated 
+    if (x + y < 1.0f) {
         alpha = 1.0 - y - x;
-        beta = y;
-        gamma = x;
+        beta = x;
+        gamma = y;
 
         p_Alpha = v[0]; // A
     }
     else {
         //alpha + beta + gamma > 1
         alpha = y + x - 1.0;
-        beta = 1.0 - x;
-        gamma = 1.0 - y;
+        beta = 1.0 - y;
+        gamma = 1.0 - x;
 
         p_Alpha = v[3]; // A
 
@@ -161,8 +161,6 @@ T barycentric(const std::array<T, 4>& v, F x, F y) {
 
     //P(alpha, beta, gamma) = alpha * A + beta * B + gamma * C
     T p_abg = alpha * p_Alpha + beta * p_Beta + gamma * p_Gamma;
-
-
 
     return p_abg;
 }
