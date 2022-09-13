@@ -133,20 +133,21 @@ T barycentric(const std::array<T, 4>& v, F x, F y) {
     // We know: alpha + beta + gamma = 1
 
     F alpha, beta, gamma;
-    T p_Alpha, p_Beta, p_Gamma;
+    T p_Alpha, p_Beta, p_Gamma; //A,B,C
 
-    p_Beta = v[1];
-    p_Gamma = v[2];
+    p_Beta = v[1]; // B
+    p_Gamma = v[2]; // C
 
     // We know: alpha + beta + gamma = 1
     // determinate alpha, beta and gamma
     // x and y is (x,y) coordinates for point P in triangle, with that we can figure out the variables
-    if (x + y < 1.0f) {
+    // overall: there are ratios to consider!
+    if (x + y < 1.0f) { // point P is situated 
         alpha = 1.0 - y - x;
         beta = y;
         gamma = x;
 
-        p_Alpha = v[0];
+        p_Alpha = v[0]; // A
     }
     else {
         //alpha + beta + gamma > 1
@@ -154,7 +155,7 @@ T barycentric(const std::array<T, 4>& v, F x, F y) {
         beta = 1.0 - x;
         gamma = 1.0 - y;
 
-        p_Alpha = v[3];
+        p_Alpha = v[3]; // A
 
     }
 
