@@ -111,7 +111,7 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
                 double y = inImageCoords.y - position0.y; // Get parametrization in y direction
 
 
-                finalColor = TNM067::Interpolation::biQuadratic(v, x/2.0, y/2.0); // Divide with 2 as we have quadratic interpolation, 
+                finalColor = TNM067::Interpolation::biQuadratic(v, x/2.0, y/2.0); // Divide with 2 as we want between 0 and 1, NOT 0 and 2
                 //pixels found are double the actual length and need to half the parametrization (quadratic fit)
 
                 break;
