@@ -117,7 +117,23 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Barycentric: {
-                // Update finalColor
+
+                ivec2 position0{ floor(inImageCoords.x),floor(inImageCoords.y) }; // ivec2 = 2 dimensional integer vector, storar x och y koordinaterna
+                ivec2 position1{ ceil(inImageCoords.x),floor(inImageCoords.y) };
+                ivec2 position2{ floor(inImageCoords.x),ceil(inImageCoords.y) };
+                ivec2 position3{ ceil(inImageCoords.x),ceil(inImageCoords.y) };
+
+                std::array<T, 4> v{
+                    inPixels[inIndex(position0)],
+                    inPixels[inIndex(position1)],
+                    inPixels[inIndex(position2)],
+                    inPixels[inIndex(position3)]
+                };
+
+                double x = inImageCoords.x - position0.x; // Get domain value in x direction
+                double y = inImageCoords.y - position0.y; // Get domain value in y direction
+
+                finalColor = TNM067::Interpolation::barycentric(v, x, y);
                 break;
             }
             default:
