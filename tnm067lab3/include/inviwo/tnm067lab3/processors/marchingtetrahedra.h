@@ -72,6 +72,8 @@ public:
     #define ENABLE_DATAPOINT_POS_TEST 1
     static vec3 calculateDataPointPos(size3_t posVolume, ivec3 posCell, ivec3 dims);
 
+    vec3 getInterpolation(DataPoint vFirst, DataPoint vSecond, const float isovalue);
+
     virtual void process() override;
 
     virtual const ProcessorInfo getProcessorInfo() const override;
