@@ -59,13 +59,13 @@ void MarchingTetrahedra::process() {
 
     const float iso = isoValue_.get();
 
-    util::IndexMapper3D mapVolPosToIndex(dims);
+    util::IndexMapper3D mapVolPosToIndex(dims); //used for setting 1D index of each data point
 
     const static size_t tetrahedraIds[6][4] = {{0, 1, 2, 5}, {1, 3, 2, 5}, {3, 2, 5, 7},
-                                               {0, 2, 4, 5}, {6, 4, 2, 5}, {6, 7, 5, 2}};
+                                               {0, 2, 4, 5}, {6, 4, 2, 5}, {6, 7, 5, 2}}; // 6 tetrahedras, each tetrahedra has 4 points
 
     size3_t pos{};
-    for (pos.z = 0; pos.z < dims.z - 1; ++pos.z) {
+    for (pos.z = 0; pos.z < dims.z - 1; ++pos.z) { // 0 -> 6
         for (pos.y = 0; pos.y < dims.y - 1; ++pos.y) {
             for (pos.x = 0; pos.x < dims.x - 1; ++pos.x) {
                 // The DataPoint index should be the 1D-index for the DataPoint in the cell
@@ -74,9 +74,46 @@ void MarchingTetrahedra::process() {
 
                 // TODO: TASK 2: create a nested for loop to construct the cell
                 Cell c;
+                size_t indexForPoint = 0;
+
+                for (int z = 0; z < 2; z++) { // 0 -> 1, 
+                    for (int y = 0; y < 2; y++) {
+                        for (int x = 0; x < 2; x++) {
+                            vec3 cellPos = vec3{ x,y,z }; // position for cell
+                            vec3 scaledCellPos = calculateDataPointPos(pos, cellPos, dims); //pos = posVolume, position of volume
+
+                            vec3 cellPosInVol(pos.x + x, pos.y + y, pos.z + z);// cell position in volume
+
+                            size_t ind1D = calculateDataPointIndexInCell(cellPos); //index value from 3D to 1D
+
+                            float funcValue = volume->getAsDouble(cellPosInVol); //query values from volume
+
+                            //Set final cell values
+                            c.dataPoints[indexForPoint].pos = scaledCellPos;
+                            c.dataPoints[indexForPoint].indexInVolume = ind1D;
+                            c.dataPoints[indexForPoint].value = funcValue;
+
+                            indexForPoint++;
+                        }
+                    }
+                }
+
 
                 // TODO: TASK 3: Subdivide cell into 6 tetrahedra (hint: use tetrahedraIds)
                 std::vector<Tetrahedra> tetrahedras;
+
+
+                Tetrahedra temp;
+                for (int i = 0; i < 6; ++i) {
+                    for (int j = 0; j < 4; ++j) {
+                        size_t getId = tetrahedraIds[i][j];
+                        DataPoint dPoint = c.dataPoints[getId];
+                        temp.dataPoints[j] = dPoint;
+                    }
+                    tetrahedras.push_back(temp);
+                }
+
+
 
                 for (const Tetrahedra& tetrahedra : tetrahedras) {
                     // TODO: TASK 4: Calculate case id for each tetrahedra, and add triangles for
@@ -85,12 +122,31 @@ void MarchingTetrahedra::process() {
                     // Calculate for tetra case index
                     int caseId = 0;
 
+                    // T XX = a * (1 - x) + b * x;
+                    
+                    DataPoint v0 = tetrahedra.dataPoints[0];
+                    DataPoint v1 = tetrahedra.dataPoints[1];
+                    DataPoint v2 = tetrahedra.dataPoints[2];
+                    DataPoint v3 = tetrahedra.dataPoints[3];
+
+                    // if value in vertex < iso -> negative vertex
+                    // if value in vertex > iso -> positive vertex
+                    for (auto t : tetrahedra.dataPoints) {
+                        if (t.value < iso) { // negativ vertex ? positiv? hur veta?
+                            // caseId = ...;
+                        }
+                    }
+
                     // Extract triangles
                     switch (caseId) {
                         case 0:
                         case 15:
                             break;
                         case 1:
+                            // calculate location of the vertices of the triangle(s)
+                            // veta edge ->  interpolation?
+                            // add vertex: idOfVertex = mesh.addVertex
+                            // add triangel: mesh.addTriangle(idOfVertex1, idOfvertex2, idofvertex3)
                         case 14: {
 
                             break;
@@ -148,16 +204,16 @@ vec3 MarchingTetrahedra::calculateDataPointPos(size3_t posVolume, ivec3 posCell,
     //posCell: the 3D index of the data point within the cell
     //dims: the dimension of the volume.
 
-    vec3 scaledPoint = vec3{ 0,0,0 };
-    std::cout << "\n";
-    std::cout << "posvolume: " << posVolume[0] << " " << posVolume[1] << " " << posVolume[2] << "\n";
-    std::cout << "poscell: " << posCell[0] << " " << posCell[1] << " " << posCell[2] << "\n";
-    std::cout << "dims: " << dims[0] << " " << dims[1] << " " << dims[2] << "\n";
-    std::cout << "\n";
+    vec3 scaledPoint = vec3{ 0.f,0.f,0.f };
+    //std::cout << "\n";
+    //std::cout << "posvolume: " << posVolume[0] << " " << posVolume[1] << " " << posVolume[2] << "\n";
+    //std::cout << "poscell: " << posCell[0] << " " << posCell[1] << " " << posCell[2] << "\n";
+    //std::cout << "dims: " << dims[0] << " " << dims[1] << " " << dims[2] << "\n";
+    //std::cout << "\n";
 
-    scaledPoint[0] = posVolume[0] / dims[0];
-    scaledPoint[1] = posVolume[1] / dims[1];
-    scaledPoint[2] = posVolume[2] / dims[2];
+    scaledPoint[0] = (posVolume[0] + posCell[0]) / (dims[0] - 1.f); // dims = antalet celler i volymen/kuben, dims - 1 = 6 ????
+    scaledPoint[1] = (posVolume[1] + posCell[1]) / (dims[1] - 1.f);
+    scaledPoint[2] = (posVolume[2] + posCell[2]) / (dims[2] - 1.f);
 
     return scaledPoint;
 }
