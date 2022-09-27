@@ -79,17 +79,17 @@ void MarchingTetrahedra::process() {
                 // TODO: TASK 2: create a nested for loop to construct the cell
                 Cell c;
 
-                for (int z = 0; z < 2; z++) { // 0 -> 1, 
-                    for (int y = 0; y < 2; y++) {
-                        for (int x = 0; x < 2; x++) {
-                            vec3 cellPos = vec3{ x,y,z }; // position for cell
+                for (int z = 0; z < 2; ++z) { // 0 -> 1, 
+                    for (int y = 0; y < 2; ++y) {
+                        for (int x = 0; x < 2; ++x) {
+                            ivec3 cellPos = vec3{ x,y,z }; // position for cell
                             vec3 scaledCellPos = calculateDataPointPos(pos, cellPos, dims); //pos = posVolume, position of volume
 
                             vec3 cellPosInVol(pos.x + x, pos.y + y, pos.z + z);// cell position in volume
 
-                            size_t ind1D = calculateDataPointIndexInCell(cellPos); //index value from 3D to 1D
+                            int ind1D = calculateDataPointIndexInCell(cellPos); //index value from 3D to 1D
 
-                            float funcValue = volume->getAsDouble(cellPosInVol); //query values from volume
+                            float funcValue = (float)volume->getAsDouble(cellPosInVol); //query values from volume
                             size_t idx = mapVolPosToIndex(cellPosInVol); 
 
                             //Set final cell values
@@ -106,8 +106,8 @@ void MarchingTetrahedra::process() {
                 std::vector<Tetrahedra> tetrahedras;
 
 
-                Tetrahedra temp;
                 for (int i = 0; i < 6; ++i) {
+                    Tetrahedra temp{};
                     for (int j = 0; j < 4; ++j) {
                         size_t getId = tetrahedraIds[i][j];
                         DataPoint dPoint = c.dataPoints[getId];
@@ -134,12 +134,13 @@ void MarchingTetrahedra::process() {
                     // if value in vertex < iso -> negative vertex
                     // if value in vertex > iso -> positive vertex
 
-                    size_t i = 0;
-                    for (auto& t : tetrahedra.dataPoints) {
-                        if (t.value > iso) { // negativ vertex ? positiv? hur veta?
-                            caseId += pow(2, i);
+                    //size_t i = 0;
+                    for (size_t po{ 0 }; po < 4; ++po) {
+
+                        if (tetrahedra.dataPoints[po].value < iso) { // negativ vertex ? positiv? hur veta?
+                            caseId += (int)pow(2.0, (double)po);
                         }
-                        i = i + 1;
+                        //i = i + 1;
                     }
                     /*
                     // case 0,15
@@ -184,175 +185,278 @@ void MarchingTetrahedra::process() {
                     }
                     */
 
-                    vec3 temp1, temp2, temp3;
-                    size_t idOfVertex1, idOfVertex2, idOfVertex3, idOfVertex4, idOfVertex5, idOfVertex6;
+                   // vec3 temp1, temp2, temp3;
+                  //  size_t idOfVertex1, idOfVertex2, idOfVertex3, idOfVertex4, idOfVertex5, idOfVertex6;
 
                     // Extract triangles
                     switch (caseId) {
-                        case 0:
-                        case 15:
+                        case 0: case 15:
                             break;
-                        case 1: // triangle faces up
-                            // calculate location of the vertices of the triangle(s)
-                            // veta edge ->  interpolation?
-                            //// T XX = a * (1 - x) + b * x;
+                        case 1: case 14: { // triangle faces down // triangle faces up
 
-                            temp1 = getInterpolation(v0, v1, iso);
-                            idOfVertex1 = mesh.addVertex(temp1, 0, 1); // add vertex
+                            if (caseId == 1) {
+                                // calculate location of the vertices of the triangle(s)
+                                // veta edge ->  interpolation?
+                                //// T XX = a * (1 - x) + b * x;
 
-
-                            temp2 = getInterpolation(v0, v2, iso);
-                            idOfVertex2 = mesh.addVertex(temp2, 0, 2); // add vertex
+                                //idOfVertex1 = mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1); // add vertex
 
 
-                            temp3 = getInterpolation(v0, v3, iso);
-                            idOfVertex3 = mesh.addVertex(temp3, 0, 3); // add vertex
-
-                            mesh.addTriangle(idOfVertex1, idOfVertex3, idOfVertex2); //  add triangel
+                                //idOfVertex2 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
 
 
-                        case 14: { // triangle faces down
+                               // idOfVertex3 = mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3); // add vertex
 
-                            temp1 = getInterpolation(v0, v1, iso);
-                            idOfVertex1 = mesh.addVertex(temp1, 0, 1); // add vertex
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1), // 1
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2), // 2
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3)); // 3
+                                //add triangel
+                            }
+                            else {
 
-
-                            temp2 = getInterpolation(v0, v2, iso);
-                            idOfVertex2 = mesh.addVertex(temp2, 0, 2); // add vertex
-
-
-                            temp3 = getInterpolation(v0, v3, iso);
-                            idOfVertex3 = mesh.addVertex(temp3, 0, 3); // add vertex
-
-                            mesh.addTriangle(idOfVertex1, idOfVertex2, idOfVertex3); //  add triangel
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1), // 1
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), // 3
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2) // 2
+                                ); //  add triangel
+                            }
                             break;
                         }
-                        case 2:
+                        case 2: case 13: {
 
-                            temp1 = getInterpolation(v0, v1, iso);
-                            idOfVertex1 = mesh.addVertex(temp1, 0, 1); // add vertex
+                            if (caseId == 2) {
 
+                                //idOfVertex1 = mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1); // add vertex
 
-                            temp2 = getInterpolation(v1, v2, iso);
-                            idOfVertex2 = mesh.addVertex(temp2, 1, 2); // add vertex
+                                //idOfVertex2 = mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2); // add vertex
 
+                                //idOfVertex3 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
 
-                            temp3 = getInterpolation(v1, v3, iso);
-                            idOfVertex3 = mesh.addVertex(temp3, 1, 3); // add vertex
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v1, v0, iso), 1, 0), // 1
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), //3
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2)// 2
+                                ); //  add triangel
+                            }
+                            else {
 
-                            mesh.addTriangle(idOfVertex1, idOfVertex3, idOfVertex2); //  add triangel
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v1, v0, iso), 1, 0), // 1
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2), // 2
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3) // 3
+                                ); //  add triangel
 
-
-                        case 13: {
-
-
-                            temp1 = getInterpolation(v0, v1, iso);
-                            idOfVertex1 = mesh.addVertex(temp1, 0, 1); // add vertex
-
-
-                            temp2 = getInterpolation(v1, v2, iso);
-                            idOfVertex2 = mesh.addVertex(temp2, 1, 2); // add vertex
-
-
-                            temp3 = getInterpolation(v1, v3, iso);
-                            idOfVertex3 = mesh.addVertex(temp3, 1, 3); // add vertex
-
-                            mesh.addTriangle(idOfVertex1, idOfVertex2, idOfVertex3); //  add triangel
-
+                            }
                             break;
                         }
-                        case 3:
+                        case 3: case 12: {
+                            if (caseId == 3) {
 
-                        case 12: {
+                                //first triangle
+                                //idOfVertex1 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
 
-                            break;
-                        }
-                        case 4:
+                                //idOfVertex2 = mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3); // add vertex
 
-                            temp1 = getInterpolation(v0, v2, iso);
-                            idOfVertex1 = mesh.addVertex(temp1, 0, 2); // add vertex
+                               // idOfVertex3 = mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2); // add vertex
 
-                            temp2 = getInterpolation(v3, v2, iso);
-                            idOfVertex2 = mesh.addVertex(temp2, 3, 2); // add vertex
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), // 2
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), // 1
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2) // 3
+                                ); //  add triangel
 
-                            temp3 = getInterpolation(v1, v2, iso);
-                            idOfVertex3 = mesh.addVertex(temp3, 1, 2); // add vertex
 
-                            mesh.addTriangle(idOfVertex1, idOfVertex2, idOfVertex3); //  add triangel
+                                // second triangle
+                                //idOfVertex4 = mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3); // add vertex
 
-                        case 11: {
+                                //idOfVertex5 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
 
-                            temp1 = getInterpolation(v0, v2, iso);
-                            idOfVertex1 = mesh.addVertex(temp1, 0, 2); // add vertex
+                                //idOfVertex6 = mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2); // add vertex
 
-                            temp2 = getInterpolation(v3, v2, iso);
-                            idOfVertex2 = mesh.addVertex(temp2, 3, 2); // add vertex
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), // 4
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2), // 6
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2) // 5
+                                ); //  add triangel
+                            }
+                            else {
 
-                            temp3 = getInterpolation(v1, v2, iso);
-                            idOfVertex3 = mesh.addVertex(temp3, 1, 2); // add vertex
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), //2
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2), //3
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3) //1
+                                ); //  add triangel
 
-                            mesh.addTriangle(idOfVertex1, idOfVertex3, idOfVertex2); //  add triangel
 
-                            break;
-                        }
-                        case 5:
-                        case 10: {
+
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), // 4
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2), // 5
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2) // 6
+                                ); //  add triangel
+                            }
 
                             break;
                         }
-                        case 6:
-                            //first triangle
-                            idOfVertex1 = mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1); // add vertex
+                        case 4: case 11: {
 
-                            idOfVertex2 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
+                            if (caseId == 4) {
 
-                            idOfVertex3 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
+                               // idOfVertex1 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
 
-                            mesh.addTriangle(idOfVertex1, idOfVertex2, idOfVertex3); //  add triangel
+                                //idOfVertex2 = mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2); // add vertex
 
+                                //idOfVertex3 = mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2); // add vertex
 
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v2, v0, iso), 2, 0),  // 1
+                                    mesh.addVertex(getInterpolation(v2, v1, iso), 2, 1), // 3
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3) // 2
+                                ); //  add triangel
+                            }
+                            else {
+                                //idOfVertex1 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
 
-                            // second triangle
-                            idOfVertex4 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
+                                //idOfVertex2 = mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2); // add vertex
 
-                            idOfVertex5 = mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2); // add vertex
+                                //idOfVertex3 = mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2); // add vertex
 
-                            idOfVertex6 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v2, v0, iso), 2, 0), // 1
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3), // 2
+                                    mesh.addVertex(getInterpolation(v2, v1, iso), 2, 1)); //  3
+                            }
 
-                            mesh.addTriangle(idOfVertex4, idOfVertex5, idOfVertex6); //  add triangel
-                            
-                        case 9: {
+                            break;
+                        }
+                        case 5: case 10: {
 
-                            //first triangle
-                            idOfVertex1 = mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1); // add vertex
+                            if (caseId == 5) {
 
-                            idOfVertex2 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
-
-                            idOfVertex3 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
-
-                            mesh.addTriangle(idOfVertex1, idOfVertex3, idOfVertex2); //  add triangel
-
-
-
-
-                            // second triangle
-                            idOfVertex4 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
-
-                            idOfVertex5 = mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2); // add vertex
-
-                            idOfVertex6 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
-
-                            mesh.addTriangle(idOfVertex4, idOfVertex6, idOfVertex5); //  add triangel
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3),
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1),
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2)
+                                ); //  add triangel
 
 
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3),
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2),
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3)
+                                ); //  add triangel
+                            }
+                            else {
+
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3),
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2),
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1)
+                                ); //  add triangel
+
+
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3),
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3),
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2)
+                                ); //  add triangel
+
+                            }
+
+                            break;
+                        }
+                        case 6: case 9: {
+
+                            if (caseId == 6) {
+
+                                //first triangle
+                                //idOfVertex1 = mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1); // add vertex
+
+                                //idOfVertex2 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
+
+                                //idOfVertex3 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
+
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2),
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1), 
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3)
+                                ); //  add triangel
+
+
+
+                                // second triangle
+                                //idOfVertex4 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
+
+                                //idOfVertex5 = mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2); // add vertex
+
+                                //idOfVertex6 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
+
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2),
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), 
+                                    mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2)); //  add triangel
+                            }
+                            else {
+
+                                //first triangle
+                                //idOfVertex1 = mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1); // add vertex
+
+                                //idOfVertex2 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
+
+                                //idOfVertex3 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
+
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2),
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3),
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1)
+                                ); //  add triangel
+
+
+                                // second triangle
+                                //idOfVertex4 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
+
+                                //idOfVertex5 = mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2); // add vertex
+
+                                //idOfVertex6 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
+
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2),
+                                    mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2),
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3)
+                                ); //  add triangel
+                            }
 
 
                             break;
                         }
-                        case 7:
-                        case 8: {
+                        case 7: case 8: {
+                            if (caseId == 7) {
+
+                                //idOfVertex1 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
+
+                                //idOfVertex2 = mesh.addVertex(getInterpolation(v3, v0, iso), 3, 0); // add vertex
+
+                                //idOfVertex3 = mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2); // add vertex
+
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), // 1
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3), // 3
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3) // 2
+                                ); //  add triangel
+                            }
+                            else {
+
+                                mesh.addTriangle(
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), //1
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), //2
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3) // 3
+                                ); //  add triangel
+                          
+                            }
 
                             break;
+                        
                         }
                     }
                 }
@@ -377,16 +481,20 @@ vec3 MarchingTetrahedra::calculateDataPointPos(size3_t posVolume, ivec3 posCell,
     //posCell: the 3D index of the data point within the cell
     //dims: the dimension of the volume.
 
-    vec3 scaledPoint = vec3{ 0.f,0.f,0.f };
+    //vec3 scaledPoint = vec3{ 0.f,0.f,0.f };
     //std::cout << "\n";
     //std::cout << "posvolume: " << posVolume[0] << " " << posVolume[1] << " " << posVolume[2] << "\n";
     //std::cout << "poscell: " << posCell[0] << " " << posCell[1] << " " << posCell[2] << "\n";
     //std::cout << "dims: " << dims[0] << " " << dims[1] << " " << dims[2] << "\n";
     //std::cout << "\n";
+    vec3 vecPosVolume{ posVolume };
+    vec3 vecPosCell{ posCell };
+    vec3 vecDims{ dims - 1 };
 
-    scaledPoint[0] = (posVolume[0] + posCell[0]) / (dims[0] - 1.f); // dims = antalet celler i volymen/kuben, dims - 1 = 6 ????
-    scaledPoint[1] = (posVolume[1] + posCell[1]) / (dims[1] - 1.f);
-    scaledPoint[2] = (posVolume[2] + posCell[2]) / (dims[2] - 1.f);
+   // scaledPoint[0] = (posVolume[0] + posCell[0]) / (dims[0] - 1.f); // dims = antalet celler i volymen/kuben, dims - 1 = 6 ????
+   // scaledPoint[1] = (posVolume[1] + posCell[1]) / (dims[1] - 1.f);
+    //scaledPoint[2] = (posVolume[2] + posCell[2]) / (dims[2] - 1.f);
+    vec3 scaledPoint{ (vecPosVolume + vecPosCell) / vecDims };
 
     return scaledPoint;
 }
