@@ -85,7 +85,7 @@ void MarchingTetrahedra::process() {
                             ivec3 cellPos = vec3{ x,y,z }; // position for cell
                             vec3 scaledCellPos = calculateDataPointPos(pos, cellPos, dims); //pos = posVolume, position of volume
 
-                            vec3 cellPosInVol(pos.x + x, pos.y + y, pos.z + z);// cell position in volume
+                            size3_t cellPosInVol(pos.x + x, pos.y + y, pos.z + z);// cell position in volume
 
                             int ind1D = calculateDataPointIndexInCell(cellPos); //index value from 3D to 1D
 
@@ -137,7 +137,7 @@ void MarchingTetrahedra::process() {
                     //size_t i = 0;
                     for (size_t po{ 0 }; po < 4; ++po) {
 
-                        if (tetrahedra.dataPoints[po].value < iso) { // negativ vertex ? positiv? hur veta?
+                        if (tetrahedra.dataPoints[po].value < iso) {
                             caseId += (int)pow(2.0, (double)po);
                         }
                         //i = i + 1;
@@ -208,17 +208,17 @@ void MarchingTetrahedra::process() {
                                // idOfVertex3 = mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1), // 1
-                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2), // 2
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3)); // 3
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), v0.indexInVolume, v1.indexInVolume), // 1
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), v0.indexInVolume, v2.indexInVolume), // 2
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume)); // 3
                                 //add triangel
                             }
                             else {
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1), // 1
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), // 3
-                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2) // 2
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), v0.indexInVolume, v1.indexInVolume), // 1
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume), // 3
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), v0.indexInVolume, v2.indexInVolume) // 2
                                 ); //  add triangel
                             }
                             break;
@@ -234,17 +234,17 @@ void MarchingTetrahedra::process() {
                                 //idOfVertex3 = mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v1, v0, iso), 1, 0), // 1
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), //3
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2)// 2
+                                    mesh.addVertex(getInterpolation(v1, v0, iso), v1.indexInVolume, v0.indexInVolume), // 1
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume), //3
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume)// 2
                                 ); //  add triangel
                             }
                             else {
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v1, v0, iso), 1, 0), // 1
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2), // 2
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3) // 3
+                                    mesh.addVertex(getInterpolation(v1, v0, iso), v1.indexInVolume, v0.indexInVolume), // 1
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume), // 2
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume) // 3
                                 ); //  add triangel
 
                             }
@@ -261,9 +261,9 @@ void MarchingTetrahedra::process() {
                                // idOfVertex3 = mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), // 2
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), // 1
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2) // 3
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume), // 2
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume), // 1
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume) // 3
                                 ); //  add triangel
 
 
@@ -275,25 +275,25 @@ void MarchingTetrahedra::process() {
                                 //idOfVertex6 = mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), // 4
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2), // 6
-                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2) // 5
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume), // 4
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume), // 6
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), v0.indexInVolume, v2.indexInVolume) // 5
                                 ); //  add triangel
                             }
                             else {
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), //2
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2), //3
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3) //1
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume), //2
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume), //3
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume) //1
                                 ); //  add triangel
 
 
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), // 4
-                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2), // 5
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2) // 6
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume), // 4
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), v0.indexInVolume, v2.indexInVolume), // 5
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume) // 6
                                 ); //  add triangel
                             }
 
@@ -310,9 +310,9 @@ void MarchingTetrahedra::process() {
                                 //idOfVertex3 = mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v2, v0, iso), 2, 0),  // 1
-                                    mesh.addVertex(getInterpolation(v2, v1, iso), 2, 1), // 3
-                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3) // 2
+                                    mesh.addVertex(getInterpolation(v2, v0, iso), v2.indexInVolume, v0.indexInVolume),  // 1
+                                    mesh.addVertex(getInterpolation(v2, v1, iso), v2.indexInVolume, v1.indexInVolume), // 3
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), v2.indexInVolume, v3.indexInVolume) // 2
                                 ); //  add triangel
                             }
                             else {
@@ -323,9 +323,9 @@ void MarchingTetrahedra::process() {
                                 //idOfVertex3 = mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v2, v0, iso), 2, 0), // 1
-                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3), // 2
-                                    mesh.addVertex(getInterpolation(v2, v1, iso), 2, 1)); //  3
+                                    mesh.addVertex(getInterpolation(v2, v0, iso), v2.indexInVolume, v0.indexInVolume), // 1
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), v2.indexInVolume, v3.indexInVolume), // 2
+                                    mesh.addVertex(getInterpolation(v2, v1, iso), v2.indexInVolume, v1.indexInVolume)); //  3
                             }
 
                             break;
@@ -335,31 +335,31 @@ void MarchingTetrahedra::process() {
                             if (caseId == 5) {
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3),
-                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1),
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2)
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), v0.indexInVolume, v1.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume)
                                 ); //  add triangel
 
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3),
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2),
-                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3)
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), v2.indexInVolume, v3.indexInVolume)
                                 ); //  add triangel
                             }
                             else {
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3),
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2),
-                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1)
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), v0.indexInVolume, v1.indexInVolume)
                                 ); //  add triangel
 
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3),
-                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3),
-                                    mesh.addVertex(getInterpolation(v1, v2, iso), 1, 2)
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), v2.indexInVolume, v3.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v1, v2, iso), v1.indexInVolume, v2.indexInVolume)
                                 ); //  add triangel
 
                             }
@@ -378,9 +378,9 @@ void MarchingTetrahedra::process() {
                                 //idOfVertex3 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2),
-                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1), 
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3)
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), v0.indexInVolume, v2.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), v0.indexInVolume, v1.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume)
                                 ); //  add triangel
 
 
@@ -393,9 +393,10 @@ void MarchingTetrahedra::process() {
                                 //idOfVertex6 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2),
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), 
-                                    mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2)); //  add triangel
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), v0.indexInVolume, v2.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v3, v2, iso), v3.indexInVolume, v2.indexInVolume)
+                                ); //  add triangel
                             }
                             else {
 
@@ -407,9 +408,9 @@ void MarchingTetrahedra::process() {
                                 //idOfVertex3 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2),
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3),
-                                    mesh.addVertex(getInterpolation(v0, v1, iso), 0, 1)
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), v0.indexInVolume, v2.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v0, v1, iso), v0.indexInVolume, v1.indexInVolume)
                                 ); //  add triangel
 
 
@@ -421,9 +422,9 @@ void MarchingTetrahedra::process() {
                                 //idOfVertex6 = mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v0, v2, iso), 0, 2),
-                                    mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2),
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3)
+                                    mesh.addVertex(getInterpolation(v0, v2, iso), v0.indexInVolume, v2.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v3, v2, iso), v3.indexInVolume, v2.indexInVolume),
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume)
                                 ); //  add triangel
                             }
 
@@ -440,17 +441,17 @@ void MarchingTetrahedra::process() {
                                 //idOfVertex3 = mesh.addVertex(getInterpolation(v3, v2, iso), 3, 2); // add vertex
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), // 1
-                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3), // 3
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3) // 2
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume), // 1
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), v2.indexInVolume, v3.indexInVolume), // 3
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume) // 2
                                 ); //  add triangel
                             }
                             else {
 
                                 mesh.addTriangle(
-                                    mesh.addVertex(getInterpolation(v1, v3, iso), 1, 3), //1
-                                    mesh.addVertex(getInterpolation(v0, v3, iso), 0, 3), //2
-                                    mesh.addVertex(getInterpolation(v2, v3, iso), 2, 3) // 3
+                                    mesh.addVertex(getInterpolation(v1, v3, iso), v1.indexInVolume, v3.indexInVolume), //1
+                                    mesh.addVertex(getInterpolation(v0, v3, iso), v0.indexInVolume, v3.indexInVolume), //2
+                                    mesh.addVertex(getInterpolation(v2, v3, iso), v2.indexInVolume, v3.indexInVolume) // 3
                                 ); //  add triangel
                           
                             }
